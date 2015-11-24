@@ -1,15 +1,13 @@
 import java.net.Socket;
 
 /**
- * Created by rotiv_13 on 17-11-2015.
+ * Created by Vitor Afonso up200908303 and Ricardo Godinho up201003837 on 17/11/2015.
  */
 public class BrokerProtocol {
-
-    public void addChannel(String name, Socket socket){
-
-    }
-
-    public String processInput(String in){
+    public String processInput(String in,Broker broker, int port){
+        if(in.equals("publisher")){
+            broker.addNewPublisher(port);
+        }
         return in;
     }
 }
