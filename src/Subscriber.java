@@ -30,13 +30,11 @@ public class Subscriber {
                 BufferedReader stdIn =
                         new BufferedReader(new InputStreamReader(System.in));
         ) {
-
+            out.println("subscriber");
             String fromServer;
             String fromUser;
             while((fromUser=stdIn.readLine())!=null){
-                out.println(fromUser);
                 if (fromUser.equals("list")){
-                    System.out.println("Listing:");
                     out.println(fromUser);
                     while((fromServer=in.readLine())!=null){
                         if (fromServer.equals("...")){
@@ -52,10 +50,9 @@ public class Subscriber {
                         if (fromServer.equals("...")){
                             break;
                         }
-                        System.out.println("Stopped");
+
                     }
                 }
-                System.out.print("Waiting...\n");
             }
 
 

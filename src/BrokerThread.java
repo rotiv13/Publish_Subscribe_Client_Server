@@ -40,16 +40,23 @@ public class BrokerThread extends Thread {
             String input=streamIn.readLine();
             String splitInput[] = input.split(" ");
             String whatAreYou = splitInput[0];
+            PrintWriter stream;
             //publisher
             if(input.equals("publisher")){
                 broker.addNewPublisher(port);
                 //keep things running until "Quit!" is typed
-                while((input=streamIn.readLine()).equals("Quit!")){
-                    PrintWriter stream;
-                    //goes to all subscriber of that channel and prints what the publisher wants
-                    for(int clients : broker.getSubscriptionsPerPub().get(port)){
-                        stream = new PrintWriter(broker.getSubscribers().get(clients).socket.getOutputStream(),true);
-                        stream.println(input);
+                while((input=streamIn.readLine())!=null){
+                    if(input.equals("Quit!")) break;
+                    else {
+
+                        //goes to all subscriber of that channel and prints what the publisher wants
+                        for (int clients : broker.getSubscriptionsPerPub().get(port)) {
+                            System.out.println(broker.getSubscribers().get(clients).socket);
+                            System.out.println(broker.getSubscribers().get(clients));
+                            stream = new PrintWriter(broker.getSubscribers().get(clients).socket.getOutputStream(), true);
+                            System.out.println(stream.toString());
+                            stream.println(input);
+                        }
                     }
                 }
             }
@@ -57,22 +64,20 @@ public class BrokerThread extends Thread {
             if (input.equals("subscriber")){
                 broker.addNewSubscriber(port);
                 while ((input=streamIn.readLine())!=null){
-                    System.out.print("sub");
+                    splitInput=input.split(" ");
                     if(input.equals("list")){
                         System.out.println("List");
                         streamOut.println("We have all sorts of products. Let me show you.");
                         for(int key:broker.getPublishers().keySet()){
-
                             streamOut.println("Product: "+key+" | "+broker.getPublishers().get(key).socket);
-                            System.out.println("Product: "+key+" | "+broker.getPublishers().get(key).socket);
                         }
                         streamOut.println("Number of subscribers: "+broker.getSubscribers().size());
                         streamOut.println("...");
                     }
                     else if (splitInput[0].equals("subscribe")){
+                        System.out.println(splitInput);
                         String product = splitInput[1];
                         int productID = Integer.parseInt(product);
-                        System.out.println(productID+" " + product);
                         broker.getSubscriptionsPerPub().get(productID).add(port);
                         System.out.println("Subscriber "+ broker.getSubscribers().get(port).socket+" is watching this product "+productID);
                     }

@@ -26,26 +26,19 @@ public class Publisher {
                 Socket socket = new Socket(hostName, portNumber);
                 PrintWriter out =
                         new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in =
-                        new BufferedReader(
-                                new InputStreamReader(socket.getInputStream()));
                 BufferedReader stdIn =
                         new BufferedReader(new InputStreamReader(System.in));
         ) {
-
             //tell it is a publisher
-
+            out.println("publisher");
             String input;
-
             while ((input=stdIn.readLine())!=null){
                 out.println(input);
             }
-
         } catch (UnknownHostException e){
             System.err.println("Host unknown "+ hostName);
             System.exit(1);
         }
-
         catch (IOException e) {
             System.err.println("I/O retrieve not possible "+hostName);
             System.exit(1);
