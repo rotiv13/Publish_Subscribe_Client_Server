@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -9,7 +6,7 @@ import java.net.Socket;
  */
 
 public class BrokerThread extends Thread {
-     Socket socket = null;
+    Socket socket = null;
     private Broker broker = null;
     private int port;
     BrokerThread(Broker broker,Socket socket ,int port) {
@@ -37,57 +34,69 @@ public class BrokerThread extends Thread {
                         new InputStreamReader(
                                 socket.getInputStream()));
         ) {
-            String input=streamIn.readLine();
+            String input = streamIn.readLine();
             String splitInput[] = input.split(" ");
             String whatAreYou = splitInput[0];
             PrintWriter stream;
             //publisher
-            if(input.equals("publisher")){
+            if (input.equals("publisher")) {
                 broker.addNewPublisher(port);
                 //keep things running until "Quit!" is typed
-                while((input=streamIn.readLine())!=null){
-                    if(input.equals("Quit!")) break;
-                    else {
-
-                        //goes to all subscriber of that channel and prints what the publisher wants
+                while ((input = streamIn.readLine()) != null) {
+                    if (input.equals("Close")) {
+                        broker.clientClose(port);
+                        break;
+                    } else {
+                        PrintWriter out;
+                        byte[] bytes = new byte[1024];
+                        int count = 0;
+                        System.out.println(count);
+                        // while (count != -1) {
+//                             Socket socket=null;
                         for (int clients : broker.getSubscriptionsPerPub().get(port)) {
-                            System.out.println(broker.getSubscribers().get(clients).socket);
-                            System.out.println(broker.getSubscribers().get(clients));
-                            stream = new PrintWriter(broker.getSubscribers().get(clients).socket.getOutputStream(), true);
-                            System.out.println(stream.toString());
-                            stream.println(input);
+//                                 socket=broker.getSubscribers().get(clients).socket;
+//                                 out =socket.getOutputStream();
+//                            out.write(input);
+//                                 out.write(bytes, 0, 1024);
+                            out = new PrintWriter(broker.getSubscribers().get(clients).socket.getOutputStream(),true);
+                            out.println(input);
+//                             }
+//                             count = socket.getInputStream().read(bytes, 0, 1024);
+
                         }
                     }
                 }
             }
             //subscriber
-            if (input.equals("subscriber")){
+            if (input.equals("subscriber")) {
                 broker.addNewSubscriber(port);
-                while ((input=streamIn.readLine())!=null){
-                    splitInput=input.split(" ");
-                    if(input.equals("list")){
+                while ((input = streamIn.readLine()) != null) {
+                    splitInput = input.split(" ");
+                    if (input.equals("list")) {
                         System.out.println("List");
                         streamOut.println("We have all sorts of products. Let me show you.");
-                        for(int key:broker.getPublishers().keySet()){
-                            streamOut.println("Product: "+key+" | "+broker.getPublishers().get(key).socket);
+                        for (int key : broker.getPublishers().keySet()) {
+                            streamOut.println("Product: " + key + " | " + broker.getPublishers().get(key).socket);
                         }
-                        streamOut.println("Number of subscribers: "+broker.getSubscribers().size());
+                        streamOut.println("Number of subscribers: " + broker.getSubscribers().size());
                         streamOut.println("...");
-                    }
-                    else if (splitInput[0].equals("subscribe")){
-                        System.out.println(splitInput);
+                    } else if (splitInput[0].equals("subscribe")) {
+                        System.out.println(splitInput.toString());
                         String product = splitInput[1];
                         int productID = Integer.parseInt(product);
                         broker.getSubscriptionsPerPub().get(productID).add(port);
-                        System.out.println("Subscriber "+ broker.getSubscribers().get(port).socket+" is watching this product "+productID);
-                    }
-                    else {
+                        System.out.println("Subscriber " + broker.getSubscribers().get(port).socket + " is watching this product " + productID);
+                    } else {
                         streamOut.println("...");
                     }
                 }
             }
 
-        } catch (IOException e) {
+
+        }catch (IOException e) {
+            broker.clientClose(port);
+        }
+        catch (NullPointerException e) {
             broker.clientClose(port);
         }
     }

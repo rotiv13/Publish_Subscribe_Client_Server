@@ -1,8 +1,5 @@
 import javax.swing.plaf.synth.SynthTextAreaUI;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -33,29 +30,31 @@ public class Subscriber {
             out.println("subscriber");
             String fromServer;
             String fromUser;
-            while((fromUser=stdIn.readLine())!=null){
-                if (fromUser.equals("list")){
+            while((fromUser=stdIn.readLine())!=null) {
+                if (fromUser.equals("list")) {
                     out.println(fromUser);
-                    while((fromServer=in.readLine())!=null){
-                        if (fromServer.equals("...")){
+                    while ((fromServer = in.readLine()) != null) {
+                        if (fromServer.equals("...")) {
                             break;
                         }
                         System.out.println(fromServer);
                     }
-                }
-                else {
+                } else {
                     out.println(fromUser);
                     System.out.println("Listening");
-                    while ((fromServer=in.readLine())!=null){
-                        if (fromServer.equals("...")){
-                            break;
-                        }
-
+                    while ((fromServer=in.readLine())!=null) {
+                        // File video = new File("/home/rotiv_13/workspace/SD_PUB_SUB/test.avi");
+                        // FileOutputStream fos = new FileOutputStream(video);
+                        // byte[] data = new byte[1024];
+                        // int count = socket.getInputStream().read(data, 0, 1024);
+                        // while (count != -1) {
+                        //     fos.write(data, 0, count);
+                        //     count = socket.getInputStream().read(data, 0, 1024);
+                        // }
+                        System.out.println(fromServer);
                     }
                 }
             }
-
-
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);
