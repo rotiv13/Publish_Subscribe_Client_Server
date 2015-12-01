@@ -40,9 +40,8 @@ public class BrokerThread extends Thread {
             String input=streamIn.readLine();
             String splitInput[] = input.split(" ");
             String whatAreYou = splitInput[0];
-            String whereRYouFrom = splitInput[1];
             //publisher
-            if(whatAreYou.equals("publish")){
+            if(input.equals("publisher")){
                 broker.addNewPublisher(port);
                 //keep things running until "Quit!" is typed
                 while((input=streamIn.readLine()).equals("Quit!")){
@@ -55,22 +54,26 @@ public class BrokerThread extends Thread {
                 }
             }
             //subscriber
-            if (whatAreYou.equals("subscribe")){
+            if (input.equals("subscriber")){
                 broker.addNewSubscriber(port);
-                while (true){
-                    input = streamIn.readLine();
+                while ((input=streamIn.readLine())!=null){
+                    System.out.print("sub");
                     if(input.equals("list")){
+                        System.out.println("List");
                         streamOut.println("We have all sorts of products. Let me show you.");
                         for(int key:broker.getPublishers().keySet()){
+
                             streamOut.println("Product: "+key+" | "+broker.getPublishers().get(key).socket);
+                            System.out.println("Product: "+key+" | "+broker.getPublishers().get(key).socket);
                         }
                         streamOut.println("Number of subscribers: "+broker.getSubscribers().size());
                         streamOut.println("...");
                     }
-                    else if (input.substring(0,input.indexOf(' ')).equals("subscribe")){
-                        int spaceIndex = input.indexOf(' ');
-                        String product = input.substring(0,spaceIndex);
+                    else if (splitInput[0].equals("subscribe")){
+                        String product = splitInput[1];
                         int productID = Integer.parseInt(product);
+                        System.out.println(productID+" " + product);
+                        broker.getSubscriptionsPerPub().get(productID).add(port);
                         System.out.println("Subscriber "+ broker.getSubscribers().get(port).socket+" is watching this product "+productID);
                     }
                     else {
@@ -80,7 +83,7 @@ public class BrokerThread extends Thread {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            broker.clientClose(port);
         }
     }
 }

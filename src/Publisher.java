@@ -8,15 +8,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-
+import java.net.UnknownHostException;
 
 
 public class Publisher {
     public static void main(String[] args) throws IOException {
 
-        if (args.length != 1) {
-            System.err.println("Usage: java Publisher <port number>");
+        if (args.length != 2) {
+            System.err.println("Usage: java Publisher <hostname> <port number>");
             System.exit(1);
         }
 
@@ -34,10 +33,22 @@ public class Publisher {
                         new BufferedReader(new InputStreamReader(System.in));
         ) {
 
-        } catch (IOException e) {
-            System.out.println("Exception caught when trying to listen on port "
-                    + portNumber + " or listening for a connection");
-            System.out.println(e.getMessage());
+            //tell it is a publisher
+
+            String input;
+
+            while ((input=stdIn.readLine())!=null){
+                out.println(input);
+            }
+
+        } catch (UnknownHostException e){
+            System.err.println("Host unknown "+ hostName);
+            System.exit(1);
+        }
+
+        catch (IOException e) {
+            System.err.println("I/O retrieve not possible "+hostName);
+            System.exit(1);
         }
     }
 }
