@@ -6,56 +6,53 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
 public class Publisher {
     public static void main(String[] args) throws IOException {
 
-        if (args.length != 2) {
-            System.err.println("Usage: java Publisher <hostname> <port number>");
+        if (args.length != 4) {
+            System.err
+                    .println("Usage: java Publisher <hostname> <port number> <stream> <videofile>");
             System.exit(1);
         }
 
         String hostName = args[0];
         int portNumber = Integer.parseInt(args[1]);
+        String streamName= args[2];
+        File video = new File(args[3]);
 
         try (
                 Socket socket = new Socket(hostName, portNumber);
-                PrintWriter out =
-                        new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader stdIn =
-                        new BufferedReader(new InputStreamReader(System.in));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
-            //tell it is a publisher
-            out.println("publisher");
-            String input;
-            while ((input=stdIn.readLine())!=null){
-                if(input.equals("Close")){
-                    out.println(input);
-                    System.exit(1);
-                }
-                // else if(input.equals("publish")) {
-                //     System.out.println("publish");
-                //     InputStream is = new FileInputStream(new File("/home/rotiv_13/workspace/SD_PUB_SUB/1.avi"));
-                //     byte[] bytes = new byte[1024];
-
-                //     OutputStream stream = socket.getOutputStream();
-
-                //     int count = is.read(bytes, 0, 1024);
-                //     while (count != -1) {
-                //         stream.write(bytes, 0, 1024);
-                //         count = is.read(bytes, 0, 1024);
-                //     }
-                // }
-                else{
-                    out.println(input);
-                }
+            String input=stdIn.readLine();
+            if(input.equals("publish")){
+                out.println("publisher "+streamName);
             }
-        } catch (UnknownHostException e){
-            System.err.println("Host unknown "+ hostName);
+
+            byte[] data = new byte[1024];
+            InputStream videoData = new FileInputStream(video);
+            OutputStream stream = socket.getOutputStream();
+
+            int bytesread;
+            int totalbytes=0;
+            System.out.println("VIDEO LENGTH: "+video.length());
+            while ((bytesread = videoData.read(data)) != -1) {
+                stream.write(data);
+                stream.flush();
+                totalbytes+=bytesread;
+                float percentage=((float)totalbytes/video.length())*100;
+                String percentage_string = String.format("%2.02f", percentage);
+                System.out.println("Read "+bytesread+" bytes and sent them to Broker\t\t"+percentage_string+"%\t totalbytes: "+totalbytes);
+
+            }
+            videoData.close();
+
+        } catch (UnknownHostException e) {
+            System.err.println("Host unknown " + hostName);
             System.exit(1);
-        }
-        catch (IOException e) {
-            System.err.println("I/O retrieve not possible "+hostName);
+        } catch (IOException e) {
+            System.err.println("I/O retrieve not possible " + hostName);
             System.exit(1);
         }
     }

@@ -10,11 +10,31 @@ import java.util.Map;
  * Created by Vitor Afonso up200908303 and Ricardo Godinho up201003837 on 17/11/2015.
  */
 
+class StreamVideo{
+    String name;
+    Integer publisher;
+    LinkedList<Integer> subscribers;
+    StreamVideo(String name, Integer publisher){
+        this.name=name;
+        this.publisher=publisher;
+        subscribers=new LinkedList<>();
+    }
+}
+
+
 public class Broker {
     //Lista de todos os clientes que ainda não se identificar nem como subscribers nem como publishers
     private Map<Integer,BrokerThread> clients = new HashMap<Integer, BrokerThread>();
     //Lista dos publishers
     private Map<Integer,BrokerThread> publishers = new HashMap<Integer, BrokerThread>();
+    //Lista  do subscribers
+    private Map<Integer,BrokerThread> subscribers = new HashMap<Integer, BrokerThread>();
+    //Lista que contem os subscritores de cada publisher
+    // private Map<Integer,LinkedList<Integer>> subscriptionsPerPub = new HashMap<Integer, LinkedList<Integer>>();
+
+    /*MEU*/
+    Map<String, StreamVideo> streamChannels = new HashMap<String, StreamVideo>();
+
 
     public Map<Integer, BrokerThread> getSubscribers() {
         return subscribers;
@@ -28,15 +48,13 @@ public class Broker {
         return clients;
     }
 
-    //Lista  do subscribers
-    private Map<Integer,BrokerThread> subscribers = new HashMap<Integer, BrokerThread>();
+    /*
 
-    public Map<Integer, LinkedList<Integer>> getSubscriptionsPerPub() {
+   public Map<Integer, LinkedList<Integer>> getSubscriptionsPerPub() {
         return subscriptionsPerPub;
     }
+    */
 
-    //Lista que contem os subscritores de cada publisher
-    private Map<Integer,LinkedList<Integer>> subscriptionsPerPub = new HashMap<Integer, LinkedList<Integer>>();
     public static void main(String[] args) throws IOException {
         int portNumber = 0;
         Broker broker = null;
@@ -82,18 +100,22 @@ public class Broker {
      */
     public void addNewSubscriber(int clientID){
         subscribers.put(clientID,clients.remove(clientID));
-        System.out.println("Subscriber: "+ subscribers.get(clientID).socket+" has entered the building!");
+        System.out.println("SUBSCRIBER: "+ subscribers.get(clientID).socket+" has entered the building!");
     }
 
     /**
      * Client becomes a publisher trasnfering him from clients to publishers.
      * @param clientID
      */
-    public void addNewPublisher(int clientID){
+    public void addNewPublisher(int clientID, String stream_name){
         publishers.put(clientID,clients.remove(clientID));
-        subscriptionsPerPub.put(clientID,new LinkedList<>());
-        System.out.println("Publisher: "+ publishers.get(clientID).socket+" has entered the building!");
-        System.out.println("And is ready for action");
+        //subscriptionsPerPub.put(clientID,new LinkedList<Integer>());
+
+        StreamVideo stream = new StreamVideo(stream_name, clientID);
+        streamChannels.put(stream_name, stream );
+
+        System.out.println("PUBLISHER: "+ publishers.get(clientID).socket+" has entered the building!");
+        System.out.println("PUBLISHER: "+publishers.get(clientID).socket+" created stream "+stream_name);
 
     }
 
@@ -107,13 +129,13 @@ public class Broker {
             //if client is in the subscribers list
             if(subscribers.containsKey(clientID)){
                 close=subscribers.remove(clientID);
-                System.out.println("Subscriber: "+close.socket+" has left the building!");
+                System.out.println("SUBSCRIBER: "+close.socket+" has left the building!");
                 close.socket.close();
             }
             //if client is the publishers list
             else {
                 close=publishers.remove(clientID);
-                System.out.println("Publisher: "+close.socket+" has left the building!");
+                System.out.println("PUBLISHER: "+close.socket+" has left the building!");
             }
         }catch (IOException e){
             e.printStackTrace();
